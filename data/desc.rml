@@ -1,0 +1,14 @@
+<rml>
+  <head>
+    <link type="text/template" href="window-template.rml"/>
+    <title>Window</title>
+    <style>
+     body {
+       left: 534px;
+     }
+    </style>
+  </head>
+  <body template="window">
+    <div id="desc" class="info"/>
+  </body>
+</rml>

@@ -1,2 +1,1 @@
-chargen
-=======
+Pathfinder character generator prototype.

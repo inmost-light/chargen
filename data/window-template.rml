@@ -1,0 +1,8 @@
+<template name="window" content="content">
+<head>
+  <link type="text/css" href="char-gen.rcss"/>
+</head>
+<body class="window">
+  <div id="content"/>
+</body>
+</template>

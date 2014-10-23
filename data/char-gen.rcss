@@ -1,0 +1,89 @@
+body {
+  font-family: Consolas;
+  font-size: 16px;
+  font-weight:normal;
+  color: white;
+  width: 410px;
+  height: 80%;
+  margin: auto;
+}
+
+b {
+  font-weight: bold; 
+}
+
+div {
+  display: block;
+}
+
+body.window {
+  background-color: rgb(0, 40, 40);
+  border-width: 1px;
+  border-color: rgb(0, 225, 225);
+  padding: 10px 15px;
+}
+
+button {
+  display: inline-block;
+  width: auto;
+  height: 28px;
+  border-width: 1px;
+  border-color: white;
+  font-family: Consolas;
+  font-size: 16px;
+  text-align: center;
+  background-color: black;
+  padding-top:8px;
+}
+
+button:focus {
+  shadow-color: black;
+}
+
+button:hover {
+  background-color: rgb(30,30,30);
+}
+
+button:active {
+  background-color: rgb(110,110,110);
+}
+
+div#content {
+  z-index: 1;
+  height: 100%;
+  overflow: auto;
+}
+
+scrollbarvertical {
+  width: 27px;
+  margin-top: -6px;
+  margin-bottom: -6px;
+  margin-right: -11px;
+}
+
+scrollbarvertical slidertrack {
+  background-color: rgb(0, 100, 100);
+}
+
+scrollbarvertical sliderbar {
+  width: 23px;
+  background-color: rgb(0, 200, 200);
+  margin-left:  2px;
+  margin-right: 2px;
+}
+
+scrollbarvertical sliderbar:hover {
+  background-color: rgb(0, 225, 225);
+}
+
+div.info {
+  white-space: pre-wrap;
+}
+
+span.link {
+  color: rgb(0, 225, 225);
+}
+
+span.link:hover {
+  color: yellow;
+}

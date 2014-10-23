@@ -1,0 +1,58 @@
+<rml>
+  <head>
+    <link type="text/template" href="window-template.rml"/>
+    <title>Window</title>
+    <style>
+     body {
+       left: 40px;
+     }
+     div.unlist button {
+       background-color: gray;
+     }
+    </style>
+  </head>
+  <body template="window">
+    <div id="roll-abilities">
+      <button id="roll-btn">Re-roll</button>
+      <button id="confirm-roll-btn">OK</button>
+      <div class="info" id="roll-result-label"/>
+    </div>
+
+    <div id="choose-race" style="display: none;">
+      <div>Pick a race: </div>
+      <div id="races-list"/>
+    </div>
+
+    <div id="choose-human-ability" style="display:none;">
+      <div>Pick ability:</div>
+      <div id="abilities-list"/>
+    </div>
+
+    <div id="choose-class" style="display: none;">
+      <div>Pick a class: </div>
+      <div id="classes-list"/>
+    </div>
+
+    <div id="choose-feats" style="display: none;">
+      <div>Pick a feat (<span id="feats-count"/> left): </div>
+      <div id="feats-list"/>
+      <div id="feats-unlist" class="unlist"/>
+    </div>
+
+    <div id="choose-spells" style="display: none;">
+      <div>Pick a spell (<span id="spells-count"/> left): </div>
+      <div id="spells-list"/>
+    </div>
+
+    <div id="gain-hp" style="display:none;">
+      <button id="hp-ok">OK</button>
+      <div class="info" id="roll-result-label">+<span id="hp-num"/> HP</div>
+    </div>
+
+    <div id="next-level" style="display: none;">
+      <button id="advance">Advance level</button>
+      <button id="finish">Done</button>
+      <div id="summary" class="info"/>
+    </div>    
+  </body>
+</rml>
