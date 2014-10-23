@@ -1,6 +1,5 @@
 package.path = package.path .. ';./scripts/?.lua'
 
-require 'events'
 local __              = require 'moses'
 local utils           = require 'utils'
 local dice            = require 'dice'
