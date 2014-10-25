@@ -24,7 +24,7 @@
     </div>
 
     <div id="choose-human-ability" style="display:none;">
-      <div>Pick ability:</div>
+      <div>Pick an ability:</div>
       <div id="abilities-list"/>
     </div>
 
