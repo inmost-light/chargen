@@ -15,8 +15,9 @@
 #include "list_selection.hpp"
 #include "description_hover.hpp"
 #include "cell.hpp"
-using namespace std;
 
+using namespace std;
+using namespace rocket_utils;
 namespace RC = Rocket::Core;
 
 RC::Context* context = nullptr;
