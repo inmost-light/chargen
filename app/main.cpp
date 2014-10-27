@@ -88,19 +88,6 @@ auto main() -> int {
   auto& doc = utils::deref(context->LoadDocument("data/main.rml"));
   auto& desc_doc = utils::deref(context->LoadDocument("data/desc.rml"));
 
-  auto roll_btn = click_trigger {doc % "roll-btn" };
-  auto roll_result = cell<bool> {false};
-  roll_result.func = [&r = roll_btn(roll_result)] (bool old) { return !old; };
-  roll_result.on_change = [api, &char_state,
-                           &l = doc % "roll-result-label"] (bool) {
-    auto roll = api.roll();
-    char_state = api.set_rolled_abilities(char_state, roll);
-    l.SetInnerRML(api.roll_view(roll).c_str());
-  };
-  roll_result.update(); ;
-
-  auto current_stage = cell<stage> {stage::roll_abilities};
-
   auto desc_hover = description_hover {doc};
   auto desc_topic = cell<string> {""};
   desc_topic.func = [&topic = desc_hover(desc_topic)] (const string&) { return topic; };
@@ -113,8 +100,21 @@ auto main() -> int {
     }
   };
 
+  auto current_stage = cell<stage> {stage::roll_abilities};
+
   //------------------------------------------------------------------------------
   auto confirm_roll_btn = click_trigger {doc % "confirm-roll-btn"};
+  
+  auto roll_btn = click_trigger {doc % "roll-btn"};
+  auto roll_result = cell<bool> {false};
+  roll_result.func = [&r = roll_btn(roll_result)] (bool old) { return !old; };
+  roll_result.on_change = [api, &char_state,
+                           &l = doc % "roll-result-label"] (bool) {
+    auto roll = api.roll();
+    char_state = api.set_rolled_abilities(char_state, roll);
+    l.SetInnerRML(api.roll_view(roll).c_str());
+  };
+  roll_result.update(); ;
 
   //------------------------------------------------------------------------------
   auto races_block = cell<bool> {false};
