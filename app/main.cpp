@@ -90,7 +90,7 @@ auto main() -> int {
 
   auto desc_hover = description_hover {doc};
   auto desc_topic = cell<string> {""};
-  desc_topic.func = [&topic = desc_hover(desc_topic)] (const string&) { return topic; };
+  desc_topic.func = [topic = desc_hover(desc_topic)] (const string&) { return topic; };
   desc_topic.on_change = [descriptions = api.get_descriptions(),
                           &div = desc_doc % "desc"] (const string& topic) {
     auto it = descriptions.find(topic);
@@ -107,7 +107,7 @@ auto main() -> int {
   
   auto roll_btn = click_trigger {doc % "roll-btn"};
   auto roll_result = cell<bool> {false};
-  roll_result.func = [&r = roll_btn(roll_result)] (bool old) { return !old; };
+  roll_result.func = [r = roll_btn(roll_result)] (bool old) { return !old; };
   roll_result.on_change = [api, &char_state,
                            &l = doc % "roll-result-label"] (bool) {
     auto roll = api.roll();
@@ -118,7 +118,7 @@ auto main() -> int {
 
   //------------------------------------------------------------------------------
   auto races_block = cell<bool> {false};
-  races_block.func = [&stg = current_stage(races_block)] (bool) {
+  races_block.func = [stg = current_stage(races_block)] (bool) {
     return stg == stage::pick_race;
   };
   races_block.on_change = [api, &doc,
@@ -133,14 +133,14 @@ auto main() -> int {
 
   auto race_selection = list_selection {doc % "races-list"};
   auto race_state = cell<string> {""};
-  race_state.func = [&s = race_selection(race_state)] (const string&) { return s; };
+  race_state.func = [s = race_selection(race_state)] (const string&) { return s; };
   race_state.on_change = [api, &char_state] (const string& race) {
     char_state = api.set_race(char_state, race);
   };
 
   //------------------------------------------------------------------------------
   auto ab_block = cell<bool> {false};
-  ab_block.func = [&stg = current_stage(ab_block)] (bool) {
+  ab_block.func = [stg = current_stage(ab_block)] (bool) {
     return stg == stage::pick_human_ability;
   };
   ab_block.on_change = [api, &doc,
@@ -155,14 +155,14 @@ auto main() -> int {
 
   auto ab_selection = list_selection {doc % "abilities-list"};
   auto ab_state = cell<string> {""};
-  ab_state.func = [&s = ab_selection(ab_state)] (const string&) { return s; };
+  ab_state.func = [s = ab_selection(ab_state)] (const string&) { return s; };
   ab_state.on_change = [api, &char_state] (const string& ability) {
     char_state = api.set_human_ability(char_state, ability);
   };
 
   //------------------------------------------------------------------------------
   auto classes_block = cell<bool> {false};
-  classes_block.func = [&stg = current_stage(classes_block)] (bool) {
+  classes_block.func = [stg = current_stage(classes_block)] (bool) {
     return stg == stage::pick_class;
   };
   classes_block.on_change = [api, &doc,
@@ -177,7 +177,7 @@ auto main() -> int {
 
   auto class_selection = list_selection {doc % "classes-list"};
   auto class_state = cell<string> {""};
-  class_state.func = [&s = class_selection(class_state)] (const string&) { return s; };
+  class_state.func = [s = class_selection(class_state)] (const string&) { return s; };
   class_state.on_change = [api, &char_state] (const string& cls) {
     char_state = api.set_class(char_state, cls);
   };
@@ -185,20 +185,20 @@ auto main() -> int {
   //------------------------------------------------------------------------------
   auto feat_selection = list_selection {doc % "feats-list"};
   auto feat_state = cell<string> {""};
-  feat_state.func = [&s = feat_selection(feat_state)] (const string&) { return s; };
+  feat_state.func = [s = feat_selection(feat_state)] (const string&) { return s; };
   feat_state.on_change = [api, &char_state] (const string& feat) {
     char_state = api.add_feat(char_state, feat);
   };
   
   auto feats_count = cell<int> {0};
   feats_count.func = [api, &char_state,
-                      &stg = current_stage(feats_count),
-                      &pick = feat_selection(feats_count)] (int old) {
+                      stg = current_stage(feats_count),
+                      pick = feat_selection(feats_count)] (int old) {
     if (stg == stage::pick_feats) {
       if (api.list_available_feats(char_state).empty()) {
         return 0;
       }
-      return pick.empty() ? api.number_of_feats(char_state) : old - 1;
+      return pick.get().empty() ? api.number_of_feats(char_state) : old - 1;
     }
     return -1;
   };
@@ -208,8 +208,8 @@ auto main() -> int {
 
   using feats_t = tuple<bool, int>;
   auto feats_block = cell<feats_t> {make_tuple(false, 0)};
-  feats_block.func = [&stg = current_stage(feats_block),
-                      &cnt = feats_count(feats_block)] (feats_t) {
+  feats_block.func = [stg = current_stage(feats_block),
+                      cnt = feats_count(feats_block)] (feats_t) {
     return make_tuple(stg == stage::pick_feats, cnt);
   };
   feats_block.on_change = [api, &doc, &char_state,
@@ -229,20 +229,20 @@ auto main() -> int {
   //------------------------------------------------------------------------------
   auto spell_selection = list_selection {doc % "spells-list"};
   auto spell_state = cell<string> {""};
-  spell_state.func = [&s = spell_selection(spell_state)] (const string&) { return s; };
+  spell_state.func = [s = spell_selection(spell_state)] (const string&) { return s; };
   spell_state.on_change = [api, &char_state] (const string& spell) {
     char_state = api.add_spell(char_state, spell);
   };
 
   auto spells_count = cell<int> {0};
   spells_count.func = [api, &char_state,
-                      &stg  = current_stage(spells_count),
-                      &pick = spell_selection(spells_count)] (int old) {
+                       stg  = current_stage(spells_count),
+                       pick = spell_selection(spells_count)] (int old) {
     if (stg == stage::pick_spells) {
       if (api.list_available_spells(char_state).empty()) {
         return 0;
       }
-      return pick.empty() ? api.number_of_spells(char_state) : old - 1;
+      return pick.get().empty() ? api.number_of_spells(char_state) : old - 1;
     }
     return -1;
   };
@@ -252,8 +252,8 @@ auto main() -> int {
 
   using spells_t = tuple<bool, int>;
   auto spells_block = cell<spells_t> {make_tuple(false, 0)};
-  spells_block.func = [&stg = current_stage(spells_block),
-                       &cnt = spells_count(spells_block)] (spells_t) {
+  spells_block.func = [stg = current_stage(spells_block),
+                       cnt = spells_count(spells_block)] (spells_t) {
     return make_tuple(stg == stage::pick_spells, cnt);
   };
   spells_block.on_change = [api, &doc, &char_state,
@@ -268,7 +268,7 @@ auto main() -> int {
 
   //------------------------------------------------------------------------------
   auto hp_stage = cell<bool> {false};
-  hp_stage.func = [&stg = current_stage(hp_stage)] (bool) { return stg == stage::gain_hp; };
+  hp_stage.func = [stg = current_stage(hp_stage)] (bool) { return stg == stage::gain_hp; };
   hp_stage.on_change = [api, &char_state,
                         &div = doc % "gain-hp",
                         &lbl = doc % "hp-num"] (bool active) {
@@ -285,12 +285,12 @@ auto main() -> int {
   //------------------------------------------------------------------------------
   auto advance_btn = click_trigger {doc % "next-level" % "advance" };
   auto advance_lvl = cell<bool> {false};
-  advance_lvl.func = [&x = advance_btn(advance_lvl)] (bool old) { return !old; };
+  advance_lvl.func = [x = advance_btn(advance_lvl)] (bool old) { return !old; };
   advance_lvl.on_change = [api, &char_state] (bool) {
     char_state = api.advance_level(char_state);
   };
   auto final_block = cell<stage> {stage::roll_abilities};
-  final_block.func = [&stg = current_stage(final_block)] (stage) { return stg; };
+  final_block.func = [stg = current_stage(final_block)] (stage) { return stg; };
   final_block.on_change = [api, &char_state,
                            &btn  = doc % "next-level" % "advance",
                            &div  = doc % "next-level",
@@ -306,30 +306,30 @@ auto main() -> int {
 
   auto finish_btn = click_trigger {doc % "next-level" % "finish"};
   auto close_app = cell<bool> {false};
-  close_app.func = [&fin = finish_btn(close_app)] (bool) { return fin; };
+  close_app.func = [fin = finish_btn(close_app)] (bool) { return fin; };
   close_app.on_change = [] (bool) { Shell::RequestExit(); };
 
   //------------------------------------------------------------------------------
   current_stage.func = [api, &char_state,
-                        &roll = confirm_roll_btn(current_stage),
-                        &race = race_selection(current_stage),
-                        &ab   = ab_selection(current_stage),
-                        &cls  = class_selection(current_stage),
-                        &feat_cnt  = feats_count(current_stage),
-                        &spell_cnt = spells_count(current_stage),
-                        &hp  = hp_confirm_btn(current_stage),
-                        &adv = advance_btn(current_stage)] (stage old) {
+                        roll = confirm_roll_btn(current_stage),
+                        race = race_selection(current_stage),
+                        ab   = ab_selection(current_stage),
+                        cls  = class_selection(current_stage),
+                        feat_cnt  = feats_count(current_stage),
+                        spell_cnt = spells_count(current_stage),
+                        hp  = hp_confirm_btn(current_stage),
+                        adv = advance_btn(current_stage)] (stage old) {
     switch (old) {
     case stage::roll_abilities: return roll ? stage::pick_race : old;
     case stage::pick_race: {
-      if (!race.empty()) {
+      if (!race.get().empty()) {
         return (api.check_if_human(char_state)) ? stage::pick_human_ability : stage::pick_class;
       } else {
         return old;
       }
     }
-    case stage::pick_human_ability: return (!ab.empty())  ? stage::pick_class : old;
-    case stage::pick_class:         return (!cls.empty()) ? stage::pick_feats : old;
+    case stage::pick_human_ability: return (!ab.get().empty())  ? stage::pick_class : old;
+    case stage::pick_class:         return (!cls.get().empty()) ? stage::pick_feats : old;
     case stage::pick_feats:  return (feat_cnt  == 0) ? stage::pick_spells : old;
     case stage::pick_spells: return (spell_cnt == 0) ? stage::gain_hp     : old;
     case stage::gain_hp:    return hp  ? stage::next_level : old;

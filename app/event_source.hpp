@@ -7,7 +7,7 @@ struct event_source {
   event_source(const T& init) : value {init} {}
   
   template <class U>
-  auto operator()(U& listener) -> T& {
+  auto operator()(U& listener) -> std::reference_wrapper<const T> {
     listeners.emplace_back([&] { listener.update(); });
     return value;
   }
