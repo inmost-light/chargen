@@ -112,7 +112,7 @@ return function(character_state)
 
   function char:base_speed() return _TP(races, self.race, 'base_speed') or 0 end
 
-  function char:ac() return 10 + self:bonus 'ac' end
+  function char:ac() return 10 + self:bonus 'ac' + self:modifier 'dex' end
 
   function char:level()
     local lvl = __.detect(xp_table, function(xp) return self.xp < xp end)
