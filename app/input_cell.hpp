@@ -3,8 +3,8 @@
 #include <functional>
 
 template <class T>
-struct event_source {
-  event_source(const T& init) : value {init} {}
+struct input_cell {
+  input_cell(const T& init) : value {init} {}
   
   template <class U>
   auto operator()(U& listener) -> std::reference_wrapper<const T> {
@@ -16,6 +16,8 @@ struct event_source {
     for (auto& l : listeners) l();
   }
 
+  std::function<void(const T&)> on_change = [] (const T&) {};
+  
 protected:
   T value;
 private:

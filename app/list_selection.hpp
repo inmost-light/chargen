@@ -1,10 +1,10 @@
 #pragma once
-#include "event_source.hpp"
+#include "input_cell.hpp"
 #include <Rocket/Core.h>
 #include <string>
 
-struct list_selection : event_source<std::string>, public Rocket::Core::EventListener {
-  list_selection(Rocket::Core::Element& e) : event_source {""} {
+struct list_selection : input_cell<std::string>, public Rocket::Core::EventListener {
+  list_selection(Rocket::Core::Element& e) : input_cell {""} {
     e.AddEventListener("click", this);
   }
   
@@ -12,6 +12,7 @@ struct list_selection : event_source<std::string>, public Rocket::Core::EventLis
     auto target = event.GetTargetElement();
     if (target->GetTagName() == "button") {
       value = target->GetInnerRML().CString();
+      on_change(value);
       notify_listeners();
       value.clear();
     }
