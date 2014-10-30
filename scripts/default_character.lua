@@ -2,8 +2,8 @@ local utils = require 'utils'
 local abilities = require 'abilities'
 
 return {
-  race          = 'human',
-  class         = 'fighter',
+  race          = 'Human',
+  class         = 'Fighter',
   human_ability = 'str',
   xp            = 0,
   feats         = {},
