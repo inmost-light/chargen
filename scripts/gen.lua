@@ -26,6 +26,14 @@ function gen(name, tbl, hints, includes, write_to_file)
     :join '\n'
     :value()
 
+  local equals_body = __(kv)
+    :map(function(_, v) 
+           local n = v[2] .. '_'
+           return '      ' .. n .. ' == rhs.' .. n
+        end)
+    :join ' &&\n'
+    :value() .. ';'
+
   local peek_helper_body = __(kv)
     :map(function(_, v) 
            local t, n = v[1], v[2]
@@ -44,8 +52,13 @@ function gen(name, tbl, hints, includes, write_to_file)
 
   local struct =
     'struct ' .. name .. ' {\n' ..
-    struct_body ..
-    '\n};\n\n'
+    struct_body .. '\n' ..
+    '  auto operator==(const ' .. name .. '& rhs) -> bool {\n' ..
+    '    return\n' ..
+    equals_body .. '\n' ..
+    '  }\n' ..
+    '  auto operator!=(const ' .. name .. '& rhs) -> bool { return !(*this == rhs); }\n' ..
+    '};\n\n'
 
   local peek_helper =
     'namespace lua {\n' ..
@@ -86,15 +99,14 @@ function gen(name, tbl, hints, includes, write_to_file)
   return res
 end
 
---[[
+--[-[
 gen(
   'rolls',
-  rroll(),
+  roll(),
   {},
   {},
   true
 )
---]
 gen(
   'character_state', 
   get_default_char(), 
@@ -107,5 +119,4 @@ gen(
   {'"lua_vector.hpp"', '"lua_string.hpp"', '"lua_map.hpp"'},
   true
 )
---]
---]]
+

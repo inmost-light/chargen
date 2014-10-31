@@ -1,4 +1,4 @@
-// generated with gen.lua on 20-10-14 14:23:29
+// generated with gen.lua on 30-10-14 19:25:09
 #pragma once
 #include "lua.hpp"
 
@@ -9,6 +9,16 @@ struct rolls {
   int int_;
   int str_;
   int wis_;
+  auto operator==(const rolls& rhs) -> bool {
+    return
+      cha_ == rhs.cha_ &&
+      con_ == rhs.con_ &&
+      dex_ == rhs.dex_ &&
+      int_ == rhs.int_ &&
+      str_ == rhs.str_ &&
+      wis_ == rhs.wis_;
+  }
+  auto operator!=(const rolls& rhs) -> bool { return !(*this == rhs); }
 };
 
 namespace lua {
