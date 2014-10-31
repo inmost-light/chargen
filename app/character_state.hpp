@@ -1,4 +1,4 @@
-// generated with gen.lua on 30-10-14 19:25:09
+// generated with gen.lua on 31-10-14 13:51:27
 #pragma once
 #include "lua.hpp"
 #include "lua_vector.hpp"
@@ -14,7 +14,7 @@ struct character_state {
   rolls rolled_abilities_;
   std::vector<std::string> spells_;
   int xp_;
-  auto operator==(const character_state& rhs) -> bool {
+  auto operator==(const character_state& rhs) const -> bool {
     return
       class_ == rhs.class_ &&
       feats_ == rhs.feats_ &&
@@ -25,7 +25,7 @@ struct character_state {
       spells_ == rhs.spells_ &&
       xp_ == rhs.xp_;
   }
-  auto operator!=(const character_state& rhs) -> bool { return !(*this == rhs); }
+  auto operator!=(const character_state& rhs) const -> bool { return !(*this == rhs); }
 };
 
 namespace lua {

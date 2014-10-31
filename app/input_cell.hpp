@@ -4,7 +4,10 @@
 
 template <class T>
 struct input_cell {
-  input_cell(const T& init) : value {init} {}
+  // not using `value {init}` here
+  // http://www.stroustrup.com/4th.html
+  // It's a bug in the standard. Fixed for C++14. For now use one of the traditional notations
+  input_cell(const T& init) : value(init) {}
   
   template <class U>
   auto operator()(U& listener) -> std::reference_wrapper<const T> {

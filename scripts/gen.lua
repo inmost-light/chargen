@@ -53,11 +53,11 @@ function gen(name, tbl, hints, includes, write_to_file)
   local struct =
     'struct ' .. name .. ' {\n' ..
     struct_body .. '\n' ..
-    '  auto operator==(const ' .. name .. '& rhs) -> bool {\n' ..
+    '  auto operator==(const ' .. name .. '& rhs) const -> bool {\n' ..
     '    return\n' ..
     equals_body .. '\n' ..
     '  }\n' ..
-    '  auto operator!=(const ' .. name .. '& rhs) -> bool { return !(*this == rhs); }\n' ..
+    '  auto operator!=(const ' .. name .. '& rhs) const -> bool { return !(*this == rhs); }\n' ..
     '};\n\n'
 
   local peek_helper =
@@ -92,7 +92,7 @@ function gen(name, tbl, hints, includes, write_to_file)
     struct .. peek_helper .. push_helper
   
   if write_to_file then
-    local f = io.open('../gen/' .. name .. '.hpp', 'w')
+    local f = io.open('../app/' .. name .. '.hpp', 'w')
     f:write(res)
     f:close()
   end
