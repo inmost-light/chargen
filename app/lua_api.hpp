@@ -82,7 +82,13 @@ struct lua_api {
   auto at_max_level(state_arg state) const {
     return lua::call<bool>(L, "at_max_level", state);
   }
-  auto random_seed(int x) {
+  auto random_seed(int x) const {
     return lua::call(L, "random_seed", x);
+  }
+  auto get_level(state_arg state) const {
+    return lua::call<int>(L, "get_level", state);
+  }
+  auto max_hp_gain(state_arg state) const {
+    return lua::call<int>(L, "max_hp_gain", state);
   }
 };

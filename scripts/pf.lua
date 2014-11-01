@@ -165,3 +165,12 @@ end
 function random_seed(x)
   math.randomseed(x)
 end
+
+function get_level(state)
+  return character_sheet(state):level()
+end
+
+function max_hp_gain(state)
+  local cs = character_sheet(state)
+  return cs:hit_die() + cs:modifier 'con'
+end
