@@ -128,11 +128,12 @@ return function(character_state)
   end
   
   function char:hp_gain()
-    return (self:level() == 1 and self:hit_die()) or dice.roll(1, self:hit_die())
+    local roll = (self:level() == 1 and self:hit_die()) or dice.roll(1, self:hit_die())
+    return math.max(roll + self:modifier 'con', 1)
   end
 
   function char:max_hp()
-    return utils.sum(self.hp_rolls)
+    return utils.sum(self.hp_rolls) + self:bonus 'hp'
   end
 
   function char:fortitude() return self:modifier 'con' + self:bonus 'fortitude' end
