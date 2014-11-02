@@ -20,6 +20,8 @@ namespace rocket_utils {
   
   auto show(Rocket::Core::Element& e) -> void {
     e.SetProperty("display", "block");
+    // hack, prevents clicking on hidden buttons
+    e.GetContext()->ProcessMouseMove(0, 0, 0);
   }
 
   auto fill_list(Rocket::Core::ElementDocument&  doc,

@@ -254,7 +254,6 @@ auto main() -> int {
     if (!spell.get().empty()) return api.add_spell(old, spell);
     if (hp)                   return api.add_hp_roll(old, hp_gain);
     if (adv)                  return api.advance_level(old);
-    // TODO fix invisible button click
   };
 
   //------------------------------------------------------------------------------
