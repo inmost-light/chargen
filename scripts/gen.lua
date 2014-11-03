@@ -7,7 +7,7 @@ local type_conversion = {
   string  = 'std::string',
 }
 
-function gen(name, tbl, hints, includes, write_to_file)
+local function gen(name, tbl, hints, includes)
   local proc = __(tbl)
     :map(function(_, v) return type(v) end)
     :map(function(k, t) 
@@ -86,37 +86,57 @@ function gen(name, tbl, hints, includes, write_to_file)
     :value()
 
   local res =
-    '// generated with gen.lua on ' .. os.date('%d-%m-%y %H:%M:%S') .. '\n' ..
     '#pragma once\n' ..
     headers .. '\n\n' ..
     struct .. peek_helper .. push_helper
   
-  if write_to_file then
-    local f = io.open('../app/' .. name .. '.hpp', 'w')
-    f:write(res)
-    f:close()
-  end
   return res
 end
 
---[-[
-gen(
-  'rolls',
-  roll(),
-  {},
-  {},
-  true
-)
-gen(
-  'character_state', 
-  get_default_char(), 
-  {
-    rolled_abilities = 'rolls', 
-    feats = 'std::map<std::string, int>', 
-    spells = 'std::vector<std::string>',
-    hp_rolls = 'std::vector<int>'
-  }, 
-  {'"lua_vector.hpp"', '"lua_string.hpp"', '"lua_map.hpp"'},
-  true
-)
+local function gen_structs(structs)
+  for name, v in pairs(structs) do
+    local new = gen(name, v.body or {}, v.types or {}, v.includes or {})
+
+    local old = {}
+
+    local f = io.open('../app/' .. name .. '.hpp', 'r')
+    if f then
+      for line in f:lines() do
+        table.insert(old, line)
+      end
+      f:close()
+
+      old = __(old)
+        :tail(2)
+        :join '\n'
+        :value() .. '\n'
+    end
+
+    if old ~= new then
+      local f = io.open('../app/' .. name .. '.hpp', 'w')
+      f:write('// generated with gen.lua on ' .. os.date('%d-%m-%y %H:%M:%S') .. '\n')
+      f:write(new)
+      f:close()
+      print('[+] ' .. name)
+    end
+  end
+end
+
+--------------------------------------------------------------------------------
+gen_structs {
+  rolls = {
+    body = roll(),
+  },
+
+  character_state = {
+    body = get_default_char(), 
+    types = {
+      rolled_abilities = 'rolls', 
+      feats            = 'std::map<std::string, int>', 
+      spells           = 'std::vector<std::string>',
+      hp_rolls         = 'std::vector<int>'
+    }, 
+    includes = {'"lua_vector.hpp"', '"lua_string.hpp"', '"lua_map.hpp"'}
+  }
+}
 
