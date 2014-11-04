@@ -7,7 +7,27 @@ local type_conversion = {
   string  = 'std::string',
 }
 
+local function template(str)
+  return setmetatable({}, {
+    __div = function(this, dict)
+      return str:gsub('%%([%w_]+)%%', dict)
+    end
+  })
+end
+
+local function indented_template(spaces_count)
+  return function(str)
+    local spaces = string.rep(' ', spaces_count)
+    local str = str:gsub('^'  .. spaces, '')
+          str = str:gsub('\n' .. spaces, '\n')
+    return template(str)
+  end
+end
+
 local function gen(name, tbl, hints, includes)
+  local X = template
+  local XCROP = indented_template
+
   local proc = __(tbl)
     :map(function(_, v) return type(v) end)
     :map(function(k, t) 
@@ -18,77 +38,84 @@ local function gen(name, tbl, hints, includes)
         end)
     :value()
 
-  local kv = __.zip(__.values(proc), __.keys(proc))
-  __.sort(kv, function(a, b) return a[2] < b[2] end)
+  local kv = __(proc)
+    :values()
+    :zip(__.keys(proc))
+    :sort(function(a, b) return a[2] < b[2] end)
+    :map(function(_, p) return { type = p[1], name = p[2] } end)
+    :value()
 
   local struct_body = __(kv)
-    :map(function(_, v) return '  ' .. v[1] .. ' ' .. v[2] .. '_;' end)
+    :map(function(_, v) return X'  %type% %name%_;' / v end)
     :join '\n'
     :value()
 
   local equals_body = __(kv)
     :map(function(_, v) 
-           local n = v[2] .. '_'
-           return '      ' .. n .. ' == rhs.' .. n
+           return X'      %name%_ == rhs.%name%_' / v
         end)
     :join ' &&\n'
     :value() .. ';'
 
   local peek_helper_body = __(kv)
     :map(function(_, v) 
-           local t, n = v[1], v[2]
-           return '      pop<' .. t .. '>(L, "' .. n .. '")'
+           return X'      pop<%type%>(L, "%name%")' / v
         end)
     :join ',\n'
     :value()
 
   local push_helper_body = __(kv)
     :map(function(_, v)
-           local n = v[2]
-           return '    push_key_value(L, "' .. n .. '", val.' .. n .. '_);'
+           return X'    push_key_value(L, "%name%", val.%name%_);' / v
         end)
     :join '\n'
     :value()
 
-  local struct =
-    'struct ' .. name .. ' {\n' ..
-    struct_body .. '\n' ..
-    '  auto operator==(const ' .. name .. '& rhs) const -> bool {\n' ..
-    '    return\n' ..
-    equals_body .. '\n' ..
-    '  }\n' ..
-    '  auto operator!=(const ' .. name .. '& rhs) const -> bool { return !(*this == rhs); }\n' ..
-    '};\n\n'
+  local struct_parts = {}
+  struct_parts.definition = XCROP(4) [[
+    struct %T% {
+    %members%
+      auto operator==(const %T%& rhs) const -> bool {
+        return
+    %equals_body%
+      }
+      auto operator!=(const %T%& rhs) const -> bool { return !(*this == rhs); }
+    };
+    ]] / { T = name, members = struct_body, equals_body = equals_body }
 
-  local peek_helper =
-    'namespace lua {\n' ..
-    '  template <>\n' ..
-    '  auto peek_helper<' .. name .. '>::operator()() -> return_type {\n' ..
-    '    return {\n' ..
-    peek_helper_body .. '\n' ..
-    '    };\n' ..
-    '  }\n' ..
-    '}\n'
+  struct_parts.peek_helper = XCROP(4) [[
+    namespace lua {
+      template <>
+      auto peek_helper<%T%>::operator()() -> return_type {
+        return {
+    %peek_helper_body%
+        };
+      }
+    }]] / { T = name, peek_helper_body = peek_helper_body }
 
-  local push_helper =
-    'namespace lua {\n' ..
-    '  template <>\n' ..
-    '  auto push_helper<' .. name .. '>::operator()(argument_type val) -> void {\n' ..
-    '    lua_newtable(L);\n' ..
-    push_helper_body .. '\n' ..
-    '  }\n' ..
-    '}\n'
+  struct_parts.push_helper = XCROP(4) [[
+    namespace lua {
+      template <>
+      auto push_helper<%T%>::operator()(argument_type val) -> void {
+        lua_newtable(L);
+    %push_helper_body%
+      }
+    }]] / { T = name, push_helper_body = push_helper_body }
   
-  local headers = __(includes)
+  struct_parts.headers = __(includes)
     :addTop '"lua.hpp"'
-    :map(function(_, hpp) return '#include ' .. hpp end)
+    :map(function(_, header) return '#include ' .. header end)
     :join '\n'
     :value()
 
-  local res =
-    '#pragma once\n' ..
-    headers .. '\n\n' ..
-    struct .. peek_helper .. push_helper
+  local res = XCROP(4) [[
+    #pragma once
+    %headers%
+
+    %definition%
+    %peek_helper%
+    %push_helper%
+    ]] / struct_parts
   
   return res
 end
