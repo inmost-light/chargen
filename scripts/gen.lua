@@ -10,7 +10,9 @@ local type_conversion = {
 local function template(str)
   return setmetatable({}, {
     __div = function(this, dict)
-      return str:gsub('%%([%w_]+)%%', dict)
+      return str:gsub('( *)%%([%w_]+)%%', function(spaces, key)
+        return spaces .. dict[key]:gsub('\n([^\n]+)', '\n' .. spaces .. '%1')
+      end)
     end
   })
 end
@@ -46,27 +48,27 @@ local function gen(name, tbl, hints, includes)
     :value()
 
   local struct_body = __(kv)
-    :map(function(_, v) return X'  %type% %name%_;' / v end)
+    :map(function(_, v) return X'%type% %name%_;' / v end)
     :join '\n'
     :value()
 
   local equals_body = __(kv)
     :map(function(_, v) 
-           return X'      %name%_ == rhs.%name%_' / v
+           return X'%name%_ == rhs.%name%_' / v
         end)
     :join ' &&\n'
     :value() .. ';'
 
   local peek_helper_body = __(kv)
     :map(function(_, v) 
-           return X'      pop<%type%>(L, "%name%")' / v
+           return X'pop<%type%>(L, "%name%")' / v
         end)
     :join ',\n'
     :value()
 
   local push_helper_body = __(kv)
     :map(function(_, v)
-           return X'    push_key_value(L, "%name%", val.%name%_);' / v
+           return X'push_key_value(L, "%name%", val.%name%_);' / v
         end)
     :join '\n'
     :value()
@@ -74,10 +76,10 @@ local function gen(name, tbl, hints, includes)
   local struct_parts = {}
   struct_parts.definition = XCROP(4) [[
     struct %T% {
-    %members%
+      %members%
       auto operator==(const %T%& rhs) const -> bool {
         return
-    %equals_body%
+          %equals_body%
       }
       auto operator!=(const %T%& rhs) const -> bool { return !(*this == rhs); }
     };
@@ -88,7 +90,7 @@ local function gen(name, tbl, hints, includes)
       template <>
       auto peek_helper<%T%>::operator()() -> return_type {
         return {
-    %peek_helper_body%
+          %peek_helper_body%
         };
       }
     }]] / { T = name, peek_helper_body = peek_helper_body }
@@ -98,7 +100,7 @@ local function gen(name, tbl, hints, includes)
       template <>
       auto push_helper<%T%>::operator()(argument_type val) -> void {
         lua_newtable(L);
-    %push_helper_body%
+        %push_helper_body%
       }
     }]] / { T = name, push_helper_body = push_helper_body }
   
