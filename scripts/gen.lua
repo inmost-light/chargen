@@ -20,8 +20,9 @@ end
 local function indented_template(spaces_count)
   return function(str)
     local spaces = string.rep(' ', spaces_count)
-    local str = str:gsub('^'  .. spaces, '')
-          str = str:gsub('\n' .. spaces, '\n')
+    str = str
+      :gsub('^'  .. spaces, '')
+      :gsub('\n' .. spaces, '\n')
     return template(str)
   end
 end
@@ -43,24 +44,26 @@ local function gen(name, tbl, hints, includes)
   local kv = __(proc)
     :values()
     :zip(__.keys(proc))
-    :sort(function(a, b) return a[2] < b[2] end)
     :map(function(_, p) return { type = p[1], name = p[2] } end)
+    :sort(function(a, b) return a.name < b.name end)
     :value()
 
   local struct_body = __(kv)
-    :map(function(_, v) return X'%type% %name%_;' / v end)
+    :map(function(_, v)
+           return X'%type% %name%_;' / v 
+        end)
     :join '\n'
     :value()
 
   local equals_body = __(kv)
-    :map(function(_, v) 
+    :map(function(_, v)
            return X'%name%_ == rhs.%name%_' / v
         end)
     :join ' &&\n'
     :value() .. ';'
 
   local peek_helper_body = __(kv)
-    :map(function(_, v) 
+    :map(function(_, v)
            return X'pop<%type%>(L, "%name%")' / v
         end)
     :join ',\n'
